@@ -7,8 +7,10 @@ class TimeSlotPicker extends StatefulWidget {
   final DateTime date;
   final ShapeBorder slotBorder;
   final TextStyle textStyle;
+  final int defaultSelectedHour;
+  final bool hour12;
   final tapEvent onTap;
-  TimeSlotPicker({Key key, this.date, this.slotBorder, this.textStyle, @required this.onTap}):super(key:key);
+  TimeSlotPicker({Key key, this.date, this.slotBorder, this.textStyle, this.defaultSelectedHour, this.hour12, @required this.onTap}):super(key:key);
   @override
   _TimeSlotPickerState createState() => _TimeSlotPickerState();
 }
@@ -16,6 +18,9 @@ class TimeSlotPicker extends StatefulWidget {
 class _TimeSlotPickerState extends State<TimeSlotPicker> {
   DateTime _currentDate = new DateTime.now();
   List<Slot> _timeSlots = [];
+  int _selected = 0;
+
+  ScrollController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -26,16 +31,21 @@ class _TimeSlotPickerState extends State<TimeSlotPicker> {
         scrollDirection: Axis.horizontal,
         itemCount: 24,
         shrinkWrap: true,
+        controller: _controller,
 
         itemBuilder: (BuildContext context, int index){
           return new Padding(
             padding: const EdgeInsets.only(left: 10.0, right: 10.0),
             child: new FlatButton(
+              color: index == _selected ? Theme.of(context).colorScheme.primaryVariant : null,
               shape: widget.slotBorder==null?RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)):widget.slotBorder,
               padding: EdgeInsets.all(10.0),
               child: new Text(_timeSlots[index].slotString, style: widget.textStyle!=null?widget.textStyle:new TextStyle(),),
               onPressed: (){
                 widget.onTap(_timeSlots[index].startTime, _timeSlots[index].endTime);
+                setState(() {
+                  _selected = index;
+                });
               },
             ),
           );
@@ -52,16 +62,19 @@ class _TimeSlotPickerState extends State<TimeSlotPicker> {
     _currentDate = new DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
 
     this._timeSlots = _createTimeList(_currentDate);
+
+    _controller = ScrollController(initialScrollOffset: (121 * _selected).toDouble()); // hacky
   }
 
   List<Slot> _createTimeList(DateTime date){
     List<Slot> slots = [];
     DateTime currentStartTime = date;
     while(true){
+      if (widget.defaultSelectedHour == currentStartTime.hour) _selected = slots.length;
       Slot slot = new Slot();
       slot.startTime = currentStartTime;
       slot.endTime = currentStartTime.add(Duration(hours: 1)).subtract(Duration(seconds: 1));
-      slot.slotString = _24HourTo12HourString(slot.startTime) + " - " + _24HourTo12HourString(slot.endTime);
+      slot.slotString = _timeToString(slot.startTime) + " - " + _timeToString(slot.endTime);
       currentStartTime = currentStartTime.add(Duration(hours: 1));
       slots.add(slot);
 
@@ -71,23 +84,26 @@ class _TimeSlotPickerState extends State<TimeSlotPicker> {
     return slots;
   }
 
-  String _24HourTo12HourString(DateTime time){
-    if(time.hour==0){
-//      String hour = time.hour.toString().length<2?"0"+time.hour.toString():time.hour.toString();
-      String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
-      return "12:$minute AM";
-    }else if(time.hour<12){
-      String hour = time.hour.toString().length<2?"0"+time.hour.toString():time.hour.toString();
-      String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
-      return "$hour:$minute AM";
-    }else if(time.hour==12){
-//      String hour = time.hour.toString().length<2?"0"+time.hour.toString():time.hour.toString();
-      String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
-      return "12:$minute PM";
-    }else{
-      String hour = (time.hour-12).toString().length<2?"0"+(time.hour-12).toString():(time.hour-12).toString();
-      String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
-      return "$hour:$minute PM";
+  String _timeToString(DateTime time) {
+    if (widget.hour12 == true) {
+      if(time.hour==0){
+        String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
+        return "12:$minute AM";
+      }else if(time.hour<12){
+        String hour = time.hour.toString().length<2?"0"+time.hour.toString():time.hour.toString();
+        String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
+        return "$hour:$minute AM";
+      }else if(time.hour==12){
+        String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
+        return "12:$minute PM";
+      }else{
+        String hour = (time.hour-12).toString().length<2?"0"+(time.hour-12).toString():(time.hour-12).toString();
+        String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
+        return "$hour:$minute PM";
+      }
     }
+    String hour = time.hour.toString().length<2?"0"+time.hour.toString():time.hour.toString();
+    String minute = time.minute.toString().length<2?"0"+time.minute.toString():time.minute.toString();
+    return "$hour:$minute";
   }
 }

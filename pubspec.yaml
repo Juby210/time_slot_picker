@@ -1,8 +1,8 @@
 name: time_slot_picker
 description: Time Slot Picker Plugin
-version: 0.0.1
+version: 0.0.2
 author: Prashant Rahate <prashant.rahate92@yahoo.com>
-homepage: https://github.com/prashantrahate/time_slot_picker
+homepage: https://github.com/Juby210/time_slot_picker
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

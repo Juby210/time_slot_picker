@@ -7,7 +7,9 @@ A library for picking time slot from horizontal strip.
 1.0 Add this to your package's pubspec.yaml file:
 ```dart
 dependencies:
-  time_slot_picker: ^0.0.1
+  time_slot_picker:
+    git:
+      url: https://github.com/Juby210/time_slot_picker.git
 ```
 
 2.1 Install it with pub:
@@ -39,6 +41,8 @@ new Container(
                     date: new DateTime.now().subtract(Duration(days: 5)), // (Optional)
                     slotBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)), // (Optional)
                     textStyle: TextStyle(color: Colors.white), // (Optional)
+                    defaultSelectedHour: 10, // (Optional)
+                    hour12: true, // (Optional)
                     onTap: (DateTime startTime, DateTime endTime){ // (Required)
                         print(startTime.toString() +" >> "+endTime.toString());
                     },
@@ -52,6 +56,8 @@ new Container(
 `date` - (Optional) Add `date` if you need to get time with preset date.
 `slotBorder` - (Optional) Add `slotBorder` if you need to change border of time slot button. Default 'circular'.
 `textStyle` - (Optional) Add `textStyle` to change text appearance.
+`defaultSelectedHour` - (Optional) Select hour by default.
+`hour12` - (Optional) Use 12H time format.
 `onTap` - (Required) You must add this event to get `StartTime` and `EndTime` of slot.
 
 ## Output
