@@ -4,13 +4,23 @@ import 'package:time_slot_picker/slot.dart';
 
 typedef tapEvent = void Function(DateTime, DateTime);
 class TimeSlotPicker extends StatefulWidget {
-  final DateTime date;
-  final ShapeBorder slotBorder;
-  final TextStyle textStyle;
+  final DateTime? date;
+  final OutlinedBorder? slotBorder;
+  final TextStyle? textStyle;
   final int defaultSelectedHour;
   final bool hour12;
   final tapEvent onTap;
-  TimeSlotPicker({Key key, this.date, this.slotBorder, this.textStyle, this.defaultSelectedHour, this.hour12, @required this.onTap}):super(key:key);
+
+  TimeSlotPicker({
+    Key? key,
+    this.date,
+    this.slotBorder,
+    this.textStyle,
+    required this.defaultSelectedHour,
+    this.hour12 = false,
+    required this.onTap
+  }) : super(key: key);
+
   @override
   _TimeSlotPickerState createState() => _TimeSlotPickerState();
 }
@@ -20,7 +30,7 @@ class _TimeSlotPickerState extends State<TimeSlotPicker> {
   List<Slot> _timeSlots = [];
   int _selected = 0;
 
-  ScrollController _controller;
+  late ScrollController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +46,13 @@ class _TimeSlotPickerState extends State<TimeSlotPicker> {
         itemBuilder: (BuildContext context, int index){
           return new Padding(
             padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-            child: new FlatButton(
-              color: index == _selected ? Theme.of(context).colorScheme.primaryVariant : null,
-              shape: widget.slotBorder==null?RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)):widget.slotBorder,
-              padding: EdgeInsets.all(10.0),
-              child: new Text(_timeSlots[index].slotString, style: widget.textStyle!=null?widget.textStyle:new TextStyle(),),
+            child: new TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: index == _selected ? Theme.of(context).colorScheme.primaryVariant : null,
+                shape: widget.slotBorder ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                padding: EdgeInsets.all(10.0),
+              ),
+              child: new Text(_timeSlots[index].slotString, style: widget.textStyle ?? new TextStyle()),
               onPressed: (){
                 widget.onTap(_timeSlots[index].startTime, _timeSlots[index].endTime);
                 setState(() {
@@ -58,7 +70,7 @@ class _TimeSlotPickerState extends State<TimeSlotPicker> {
   void initState() {
     super.initState();
     if(widget.date!=null)
-      _currentDate=widget.date;
+      _currentDate = widget.date ?? DateTime.now();
     _currentDate = new DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
 
     this._timeSlots = _createTimeList(_currentDate);
